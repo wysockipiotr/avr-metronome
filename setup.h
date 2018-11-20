@@ -1,12 +1,6 @@
 #ifndef __setup_h__
 #define __setup_h__
 
-#define F_CPU 8000000
-
-#ifndef BAUD
-#define BAUD 9600
-#endif
-
 #define LCD_DIR         DDRC  
 #define LCD_PORT        PORTC 
 #define RS              PC4 
@@ -30,5 +24,9 @@
 #define TAP_BTN         PD7
 
 #define TAP_TIMER_INITIAL_OFFSET 0x83
+
+#define DEFAULT_BPM         140u
+#define DEFAULT_VOL         50u
+#define DEFAULT_SIGNATURE   0
 
 #endif //__setup_h__

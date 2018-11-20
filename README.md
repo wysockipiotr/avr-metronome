@@ -1,1 +1,5 @@
 # metronome
+
+```
+make flash
+```

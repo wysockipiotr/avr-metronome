@@ -12,4 +12,8 @@
 
 #define setInputPullup(ddr, port, pin) clearBit((ddr),(pin));setBit((port),(pin))
 
+#define cursorVisible(cursorPos, currentPos) ((cursorPos) == (currentPos)) ? '>' : ' '
+
+#define CLK_NO_DIVIDE 0
+
 #endif //__util_h__

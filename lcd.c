@@ -55,7 +55,7 @@ void lcd_init(void) {
     _delay_ms(2);
 }
 
-void lcd_string(char *str) {
+void lcd_string(char * str) {
     int i;
     for (i = 0; str[i] != 0; i++) /* Send each char of string till the NULL */
     {
@@ -63,7 +63,7 @@ void lcd_string(char *str) {
     }
 }
 
-void lcd_string_xy(char row, char pos, char *str) {
+void lcd_string_xy(char row, char pos, char * str) {
     if (row == 0 && pos < 16)
         lcd_command((pos & 0x0F) | LCD_FIRST_LINE); /* Command of first row and required position<16 */
     else if (row == 1 && pos < 16)
