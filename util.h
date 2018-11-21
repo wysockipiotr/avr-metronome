@@ -12,8 +12,14 @@
 
 #define setInputPullup(ddr, port, pin) clearBit((ddr),(pin));setBit((port),(pin))
 
-#define cursorVisible(cursorPos, currentPos) ((cursorPos) == (currentPos)) ? '>' : ' '
+#define cursorVisible(cursorPos, currentPos, symbol) (((cursorPos) == (currentPos)) ? (symbol) : ' ')
 
 #define CLK_NO_DIVIDE 0
+
+#define within(param, beg, end) (((param)>=(beg))&&((param)<=(end)))
+#define between(param, beg, end) (((param) > (beg)) && ((param) < (end)))
+
+#define signature_lower(signature) ((signature) & 0x0f)
+#define signature_upper(signature) ((signature) >> 4)
 
 #endif //__util_h__

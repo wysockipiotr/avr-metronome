@@ -27,8 +27,23 @@
 
 #define TAP_TIMER_INITIAL_OFFSET 0x83
 
+#define MIN_BPM             30u
+#define MAX_BPM             400u
+#define MIN_VOLUME          0u
+#define MAX_VOLUME          100u
+#define INCREMENT_VOLUME    5u
+
 #define DEFAULT_BPM         140u
 #define DEFAULT_VOL         50u
-#define DEFAULT_SIGNATURE   0
+#define DEFAULT_SIGNATURE   0u
+
+#define BPM_CURSOR_POS      0u
+#define SIG0_CURSOR_POS     1u 
+#define SIG1_CURSOR_POS     2u 
+#define VOL_CURSOR_POS      3u
+#define MODE_CURSOR_POS     4u
+
+#define SOUND_LABEL     "SOUND"
+#define VIBRT_LABEL     "VIBRT"
 
 #endif //__setup_h__

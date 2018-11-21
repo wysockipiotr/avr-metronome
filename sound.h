@@ -42,6 +42,7 @@ int8_t sine[256] = {
 #endif
 
 extern volatile bool sound_locked;
+extern volatile bool edit_active;
 
 #ifdef SINE_WAVE
 inline static void play_note(uint16_t frequency, uint8_t duration) {
@@ -70,7 +71,7 @@ inline static void play_note(uint16_t frequency, uint8_t duration) {
 #else
 inline static void play_note(uint16_t wavelength, uint8_t duration) {
     OCR0A = wavelength;
-    if (!sound_locked) {
+    if (!sound_locked && !edit_active) {
         setBit(SPEAKER_DIR, SPEAKER);
         while (duration) {
             _delay_ms(1u);

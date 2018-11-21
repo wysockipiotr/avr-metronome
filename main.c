@@ -15,16 +15,48 @@
 #include "lcd.h"
 #include "sound.h"
 
+// currently controlled parameter (highlighted on screen)
+// [0] bpm [1, 2] signature [3] volume [4] mode
 volatile uint8_t    cursor;
+
+// '>' for switching parameters, '}' for adjusting value
+volatile char       cursor_symbol;
+
+// if true, adjusting value of highlighted parameter
+// if false, controlled parameter switching
+volatile bool       edit_active;
+
+// beats per minute
 volatile uint16_t   bpm;
-volatile uint8_t    signature; // e.g. 0100 0100 for 4/4 time signature
+
+// index of time signature chosen from signatures array
+volatile uint8_t    signature;
+
+// duration of metronome beep
 volatile uint16_t   t_beep;
+
+// duration of silence between beeps
 volatile uint16_t   t_sleep;
+
+// sound volume expressed in percent 
 volatile uint8_t    volume;
+
+// string literal indicating current mode: "SOUND" or "VIBRT"
+volatile char*      mode;
+
+// counter measuring interval between last two taps in miliseconds
 volatile uint16_t   tap_interval_counter;
+
+// flag indicating whether tap tempo mode is currently active
 volatile bool       tap_started;
+
+// flag blocking output to speaker
 volatile bool       sound_locked;
-uint8_t             signatures[2] = { 0x44, 0x34 };
+
+// available time signatures
+uint8_t             signatures[4] = { 0x44, 0x34, 0x54, 0x74 };
+
+// content to be displayed on LCD
 char                firstLineBuffer[LCD_SIZE+1];
 char                secondLineBuffer[LCD_SIZE+1];
 
@@ -71,6 +103,9 @@ inline static void setup(void) {
     tap_interval_counter = 0u;
     tap_started = false;
     sound_locked = false;
+    mode = SOUND_LABEL;
+    edit_active = false;
+    cursor_symbol = '>';
 
     lcd_init();
 
@@ -89,10 +124,10 @@ inline static void setup(void) {
 inline static void loop(void) {
     uint8_t i = 0u;
     while (true) {
-        play_note(784u, t_beep);
+        play_note(33u, t_beep);
         _delay_ms(t_sleep);
         for (i = 0u; i < (signatures[signature] >> 4) - 1; ++i) {
-            play_note(554u, t_beep);
+            play_note(47u, t_beep);
             _delay_ms(t_sleep);
         }
     }
@@ -100,35 +135,37 @@ inline static void loop(void) {
 
 inline static void update_display(void) {
     snprintf(firstLineBuffer, 17, "%c %3uBPM %c %2u/%1u ",
-             cursorVisible(cursor, 0),
+             cursorVisible(cursor, 0, cursor_symbol),
              bpm,
-             cursorVisible(cursor, 1),
+             cursorVisible(cursor, 1, cursor_symbol),
              signatures[signature] >> 4,
              signatures[signature] & 0x0f);
     snprintf(secondLineBuffer, 17, "%c %3u%%  %c  %s",
-             cursorVisible(cursor, 2),
+             cursorVisible(cursor, 2, cursor_symbol),
              volume,
-             cursorVisible(cursor, 3),
-             "SOUND");
+             cursorVisible(cursor, 3, cursor_symbol),
+             mode);
     lcd_string_xy(0, 0, firstLineBuffer);
     lcd_string_xy(1, 0, secondLineBuffer);
 }
 
 inline static void update_active_param(int delta) {
     switch (cursor) {
-        case 0u:
-            if (bpm > 80u && bpm < 350u)
+        case BPM_CURSOR_POS:
+            if (between(bpm, MIN_BPM, MAX_BPM))
                 bpm += delta;
             break;
-        case 1u:
+        case 1:
+       // case SIG1_CURSOR_POS:
             signature += delta;
-            signature %= 2;
+            signature %= 4;
             break;
-        case 2u:
-            if (volume > 0u && volume < 100u)
+        case 2:
+            if (between(volume, MIN_VOLUME, MAX_VOLUME))
                 volume += delta;
             break;
-        case 3u:
+        case 3:
+            mode = (mode == SOUND_LABEL) ? VIBRT_LABEL : SOUND_LABEL;
             break;
         default:
             break;
@@ -140,7 +177,7 @@ inline static void init_interrupts(void) {
     PCICR |= (1 << PCIE2);
 
     // pin change interrupt mask
-    PCMSK2 |= ((1 << ROTARY_A) | (1 << ROTARY_B) | (1 << TAP_BTN));
+    PCMSK2 |= ((1 << ROTARY_A) | (1 << ROTARY_B) | (1 << TAP_BTN) | (1 << ROTARY_BTN));
 
     // enable interrupts globally
     sei();
