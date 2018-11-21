@@ -7,7 +7,7 @@ MAIN = main.c
 
 ## Jeżeli podzielisz program na kilka plików .c i .h, 
 ## to tutaj dopisz dodatkowe źrodła (w tym samym katalogu)
-LOCAL_SOURCE = lcd.c 
+LOCAL_SOURCE = lcd.c mcp41xx.c
 
 ## Tutaj możesz podać kolejne katalogi (z wieloma plikami .c)
 EXTRA_SOURCE_DIR = 

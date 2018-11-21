@@ -14,6 +14,7 @@
 #include "setup.h"
 #include "lcd.h"
 #include "sound.h"
+#include "mcp41xx.h"
 
 // currently controlled parameter (highlighted on screen)
 // [0] bpm [1, 2] signature [3] volume [4] mode
@@ -108,6 +109,7 @@ inline static void setup(void) {
     cursor_symbol = '>';
 
     lcd_init();
+    spi_init();
 
     init_tap_timer();
     init_sound_timer();
@@ -163,6 +165,7 @@ inline static void update_active_param(int delta) {
         case 2:
             if (between(volume, MIN_VOLUME, MAX_VOLUME))
                 volume += delta;
+                mcp_pot_set_percent_value(100u - volume);
             break;
         case 3:
             mode = (mode == SOUND_LABEL) ? VIBRT_LABEL : SOUND_LABEL;
