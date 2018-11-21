@@ -4,36 +4,23 @@
 ISR(PCINT2_vect) {
     clearBit(SPEAKER_DIR, SPEAKER);
     bool btnPushed = bit_is_clear(ROTARY_PIN, ROTARY_BTN);
-    if (bit_is_clear(ROTARY_PIN, ROTARY_A))
-    {
-        if (bit_is_clear(ROTARY_PIN, ROTARY_B))
-        {
-            if (btnPushed)
-            {
-                if (cursor)
-                {
+    if (bit_is_clear(ROTARY_PIN, ROTARY_A)) {
+        if (bit_is_clear(ROTARY_PIN, ROTARY_B)) {
+            if (btnPushed) {
+                if (cursor) {
                     --cursor;
-                }
-                else
-                {
+                } else {
                     cursor = 3u;
                 }
+            } else {
+                update_active_param(-1);
             }
-            else
-            {
-                updateActiveParam(-1);
-            }
-        }
-        else
-        {
-            if (btnPushed)
-            {
+        } else {
+            if (btnPushed) {
                 ++cursor;
                 cursor %= 4u;
-            }
-            else
-            {
-                updateActiveParam(1);
+            } else {
+                update_active_param(1);
             }
         }
 
@@ -48,24 +35,19 @@ ISR(PCINT2_vect) {
             ;
     }
 
-    if (bit_is_clear(TAP_PIN, TAP_BTN))
-    {
+    if (bit_is_clear(TAP_PIN, TAP_BTN)) {
         sound_locked = false;
         play_note(120u, t_beep);
         sound_locked = true;
         // tap tempo handler
-        if (tap_started)
-        {
-            if (tap_interval_counter < 2001u && tap_interval_counter > 130u)
-            {
+        if (tap_started) {
+            if (tap_interval_counter < 2001u && tap_interval_counter > 130u) {
                 t_beep = tap_interval_counter >> 4;
                 t_sleep = tap_interval_counter - t_beep;
                 bpm = 60000u / tap_interval_counter;
                 update_display();
             }
-        }
-        else
-        {
+        } else {
             tap_started = true;
             sound_locked = true;
         }
@@ -73,20 +55,16 @@ ISR(PCINT2_vect) {
         tap_interval_counter = 0u;
         //TCCR2A = 0;
         TCCR2B = 0x4;
-        TCNT2 = TAP_TIMER_INITIAL_OFFSET; // 131 ticks until overflow
+        TCNT2 = TAP_TIMER_INITIAL_OFFSET;  // 131 ticks until overflow
     }
 }
 
 // tap tempo timer (1ms) overflow
-ISR(TIMER2_OVF_vect)
-{
-    if (tap_interval_counter < 2001u)
-    {
+ISR(TIMER2_OVF_vect) {
+    if (tap_interval_counter < 2001u) {
         ++tap_interval_counter;
         TCNT2 = TAP_TIMER_INITIAL_OFFSET;
-    }
-    else
-    {
+    } else {
         // dismiss tap tempo in case of timeout (over 2000ms)
         tap_started = false;
         TCCR2B &= ~(TCCR2B & 0x7);

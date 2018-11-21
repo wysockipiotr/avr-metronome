@@ -1,6 +1,8 @@
 #ifndef __setup_h__
 #define __setup_h__
 
+// #define SINE_WAVE
+
 #define LCD_DIR         DDRC  
 #define LCD_PORT        PORTC 
 #define RS              PC4 
