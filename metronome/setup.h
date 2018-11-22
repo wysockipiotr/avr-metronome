@@ -1,7 +1,18 @@
 #ifndef __setup_h__
 #define __setup_h__
 
-// #define SINE_WAVE
+#ifdef F_CPU
+    #if F_CPU != 8000000
+        #undef F_CPU
+        #define F_CPU 8000000
+    #endif
+#endif
+
+#ifndef BAUD
+    #define BAUD 9600
+#endif
+
+#include <avr/io.h>
 
 #define LCD_DIR         DDRC  
 #define LCD_PORT        PORTC 
@@ -46,23 +57,27 @@
 #define SPI_SCK_PIN     PINB
 #define SPI_SCK_DDR     DDRB
 
-#define TAP_TIMER_INITIAL_OFFSET 0x83
+#define TAP_TIMER_INITIAL_OFFSET    0x83
+#define MIN_TAP_INTERVAL            150u
+#define MAX_TAP_INTERVAL            2000u
 
 #define MIN_BPM             30u
 #define MAX_BPM             400u
 #define MIN_VOLUME          0u
 #define MAX_VOLUME          100u
-#define INCREMENT_VOLUME    5u
-
+#define VOLUME_STEP         5u
 #define DEFAULT_BPM         140u
 #define DEFAULT_VOL         50u
 #define DEFAULT_SIGNATURE   0u
+#define G                   33u
+#define CIS                 47u
 
 #define BPM_CURSOR_POS      0u
-#define SIG0_CURSOR_POS     1u 
-#define SIG1_CURSOR_POS     2u 
-#define VOL_CURSOR_POS      3u
-#define MODE_CURSOR_POS     4u
+#define SIG_CURSOR_POS      1u 
+#define VOL_CURSOR_POS      2u
+#define MODE_CURSOR_POS     3u
+#define PARAM_EDIT_SYMBOL   '>'
+#define PARAM_SELECT_SYMBOL '}'
 
 #define SOUND_LABEL     "SOUND"
 #define VIBRT_LABEL     "VIBRT"
