@@ -6,6 +6,7 @@
 #include "util.h"
 
 void lcd_command(unsigned char cmnd) {
+
     // send upper nibble
     LCD_PORT = (LCD_PORT & 0xF0) | (cmnd >> 4);
     clearBit(LCD_PORT, RS);
@@ -26,6 +27,7 @@ void lcd_command(unsigned char cmnd) {
 }
 
 void lcd_char(unsigned char data) {
+
     /* sending upper nibble */
     LCD_PORT = (LCD_PORT & 0xF0) | (data >> 4);
     LCD_PORT |= (1 << RS); /* RS=1, data reg. */
@@ -57,8 +59,8 @@ void lcd_init(void) {
 
 void lcd_string(char * str) {
     int i;
-    for (i = 0; str[i] != 0; i++) /* Send each char of string till the NULL */
-    {
+    for (i = 0; str[i] != 0; i++) {
+        /* Send each char of string till the NULL */
         lcd_char(str[i]);
     }
 }

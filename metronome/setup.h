@@ -67,7 +67,7 @@
 #define MAX_VOLUME          100u
 #define VOLUME_STEP         5u
 #define DEFAULT_BPM         140u
-#define DEFAULT_VOL         50u
+#define DEFAULT_VOL         5u
 #define DEFAULT_SIGNATURE   0u
 #define G                   33u
 #define CIS                 47u

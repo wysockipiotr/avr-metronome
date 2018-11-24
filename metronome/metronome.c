@@ -1,5 +1,6 @@
 #include "util.h"
 #include "global.h"
+#include "usart.h"
 #include "mcp41xx.h"
 #include "metronome.h"
 
@@ -186,6 +187,7 @@ inline static void setup(void) {
 
     lcd_init();
     spi_init();
+    usart_init();
 
     init_tap_timer();
     init_sound_timer();

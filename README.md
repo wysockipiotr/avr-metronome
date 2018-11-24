@@ -22,5 +22,6 @@
       +-- mcp41xx.h       // MCP4161 Digital potentiometer SPI interfacing
       +-- mcp41xx.c
    +-- remote_module      // Qduino (Arduino) remote vibrating module sketch directory
-      +--README.md
+      +-- README.md
+      +-- remote_module.ino
 ```

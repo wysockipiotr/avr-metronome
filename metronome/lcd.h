@@ -1,6 +1,9 @@
 #ifndef __lcd_h__
 #define __lcd_h__
 
+#define X 10
+
+
 #define LCD_SIZE        16u
 #define LCD_FIRST_LINE  0x80
 #define LCD_SECOND_LINE 0xC0
