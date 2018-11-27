@@ -36,12 +36,22 @@ inline static void update_active_param(int delta);
 // recalc beep and silence durations regarding current bpm value
 inline static void recalc_durations(void);
 
+// init timer1 in Fast PWM mode (for dimming lcd backlight)
+inline static void init_dimmer_pwm(void);
+
+// set lcd backlight brightness (PWM)
+inline static void set_brightness(uint8_t brightness);
+
 void metronome(void) {
     setup();
     loop();
 }
 
 void handle_portd_pin_change(void) {
+
+    set_brightness(DEFAULT_BRIGHTNESS);
+    backlight_on = true;
+    backlight_time_counter = 0u;
 
     clearBit(SPEAKER_DIR, SPEAKER);
 
@@ -89,8 +99,9 @@ void handle_portd_pin_change(void) {
         edit_active = false;
         cursor_symbol = (edit_active) ? PARAM_EDIT_SYMBOL : PARAM_SELECT_SYMBOL;
 
+        // beep during tap
         sound_locked = false;
-        play_note(120u, t_beep);
+        play_note(TAP_NOTE, t_beep);
         sound_locked = true;
 
         // tap tempo handler
@@ -109,20 +120,38 @@ void handle_portd_pin_change(void) {
         tap_interval_counter = 0u;
         //TCCR2A = 0;
         TCCR2B = 0x4;
-        TCNT2 = TAP_TIMER_INITIAL_OFFSET;  // 131 ticks until overflow
+        TCNT2 = TAP_TIMER_INITIAL_OFFSET;  // 131 ticks until overflow (overflow every 1ms)
     }
 }
 
 void handle_timer2_overflow(void) {
+
+    // handle tap tempo
     if (tap_interval_counter <= MAX_TAP_INTERVAL) {
         ++tap_interval_counter;
-        TCNT2 = TAP_TIMER_INITIAL_OFFSET;
+       // TCNT2 = TAP_TIMER_INITIAL_OFFSET;
     } else {
         // dismiss tap tempo in case of timeout (over 2000ms)
         tap_started = false;
-        TCCR2B &= ~(TCCR2B & 0x7);
+        //TCCR2B &= ~(TCCR2B & 0x7);
         sound_locked = false;
     }
+
+    // handle backlight and settings storage
+    if (backlight_time_counter <= BACKLIGHT_DURATION) {
+        ++backlight_time_counter;
+    } else {
+        if (backlight_on) {
+            backlight_on = false;
+            set_brightness(0);
+            //backlight_time_counter = 0u;
+
+            // TODO: store current metronome settings in eeprom
+        }
+    }
+
+    // restart 1ms measure
+    TCNT2 = TAP_TIMER_INITIAL_OFFSET;
 }
 
 inline static void update_display(void) {
@@ -136,7 +165,7 @@ inline static void update_display(void) {
              cursorVisible(cursor, 2, cursor_symbol),
              volume,
              cursorVisible(cursor, 3, cursor_symbol),
-             mode);
+             (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
     lcd_string_xy(0, 0, firstLineBuffer);
     lcd_string_xy(1, 0, secondLineBuffer);
 }
@@ -160,11 +189,20 @@ inline static void update_active_param(int delta) {
             mcp_pot_set_percent_value(volume);
             break;
         case MODE_CURSOR_POS:
-            mode = (mode == SOUND_LABEL) ? VIBRT_LABEL : SOUND_LABEL;
+            mode = (mode == SOUND_MODE) ? VIBRT_MODE : SOUND_MODE;
             break;
         default:
             break;
     }
+
+    // power off audio amp if unnecessary
+    if (volume == 0u || mode == VIBRT_MODE) {
+        clearBit(SHUTDOWN_PORT, SHUTDOWN);
+    } else {
+        setBit(SHUTDOWN_PORT, SHUTDOWN);
+    }
+
+    transmit_metronome(bpm, signature);
 }
 
 inline static void setup(void) {
@@ -181,13 +219,15 @@ inline static void setup(void) {
     tap_interval_counter = 0u;
     tap_started = false;
     sound_locked = false;
-    mode = SOUND_LABEL;
+    mode = SOUND_MODE;
     edit_active = false;
     cursor_symbol = PARAM_SELECT_SYMBOL;
 
     lcd_init();
     spi_init();
     usart_init();
+
+    init_dimmer_pwm(); 
 
     init_tap_timer();
     init_sound_timer();
@@ -198,6 +238,14 @@ inline static void setup(void) {
     setInputPullup(ROTARY_DIR, ROTARY_PORT, ROTARY_BTN);
     setInputPullup(TAP_DIR, TAP_PORT, TAP_BTN);
 
+    setBit(SHUTDOWN_DIR, SHUTDOWN);
+    setBit(SHUTDOWN_PORT, SHUTDOWN);
+
+    mcp_pot_set_percent_value(volume);
+
+    backlight_on = true;
+    set_brightness(DEFAULT_BRIGHTNESS);
+
     update_display();
 }
 
@@ -206,13 +254,17 @@ inline static void loop(void) {
     uint16_t t = 0u;
 
     while (true) {
-        play_note(G, t_beep);
-        for (t = t_sleep; t > 0; --t)
-            _delay_ms(1);
-        for (i = 0u; i < (signatures[signature] >> 4) - 1; ++i) {
-            play_note(CIS, t_beep);
+        if (mode == SOUND_MODE) {
+            play_note(G, t_beep);
             for (t = t_sleep; t > 0; --t)
                 _delay_ms(1);
+            for (i = 0u; i < (signatures[signature] >> 4) - 1; ++i) {
+                play_note(CIS, t_beep);
+                for (t = t_sleep; t > 0; --t)
+                    _delay_ms(1);
+            }
+        } else {
+
         }
     }
 }
@@ -231,6 +283,10 @@ inline static void init_interrupts(void) {
 inline static void init_tap_timer(void) {
     // enable timer2 overflow interrupt
     TIMSK2 = (1 << TOIE2);
+
+    TCCR2B = 0x4;
+    TCNT2 = TAP_TIMER_INITIAL_OFFSET;  // 131 ticks until overflow
+    backlight_time_counter = 0u;
 }
 
 inline static void init_sound_timer(void) {
@@ -265,4 +321,23 @@ inline static void play_note(uint16_t wavelength, uint8_t duration) {
         }
         clearBit(SPEAKER_DIR, SPEAKER);
     }
+}
+
+inline static void init_dimmer_pwm(void) {
+    setBit(TCCR1A, WGM10);
+    //setBit(TCCR1A, WGM13);
+    //setBit(TCCR1A, WGM11);
+    setBit(TCCR1A, WGM12);
+
+    setBit(TCCR1B, CS11);
+    //setBit(TCCR1B, CS10);
+    setBit(TCCR1A, COM1A1);
+
+    // enable PWM output
+    setBit(BACKLIGHT_DIR, BACKLIGHT);
+}
+
+inline static void set_brightness(uint8_t brightness) {
+    //OCR1B = OCR1A;
+    OCR1A = brightness;
 }

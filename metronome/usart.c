@@ -9,6 +9,7 @@ void usart_init(void) {
     // TODO: this should be based on settings
     UBRR0H = 0;  //UBRRH_VALUE; 
     UBRR0L = 103u;//UBRRL_VALUE; 8Mhz clk, 9600 baudrate
+
 #if USE_2X
     UCSR0A |= (1 << U2X0);
 #else
@@ -37,6 +38,31 @@ void transmit_byte(uint8_t byte) {
 
     // store byte in register to send it
     UDR0 = byte; 
+}
+
+void transmit_string(const char* str) {
+    uint8_t i = 0u;
+    while (str[i]) {
+        transmit_byte(str[i++]);
+    }
+}
+
+void transmit_metronome(uint16_t bpm, uint8_t signature) {
+
+    // transmit bpm upper half
+    transmit_byte(bpm >> 8);
+
+    // transmit bpm lower half
+    transmit_byte(bpm & 0xff);
+
+    // transmit signature (e.g. 0010 0011 for 3/4 signature)
+    transmit_byte(signature);
+}
+
+void transmit_metronome_off(void) {
+
+    // transmit vibration disable signal
+    transmit_byte(0x0);
 }
 
 uint8_t receive_byte(void) {

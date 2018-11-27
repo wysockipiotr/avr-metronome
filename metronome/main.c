@@ -30,9 +30,6 @@ volatile uint16_t t_sleep;
 // sound volume expressed in percent
 volatile uint8_t volume;
 
-// string literal indicating current mode: "SOUND" or "VIBRT"
-volatile char* mode;
-
 // counter measuring interval between last two taps in miliseconds
 volatile uint16_t tap_interval_counter;
 
@@ -41,6 +38,15 @@ volatile bool tap_started;
 
 // flag blocking output to speaker
 volatile bool sound_locked;
+
+// current metronome mode (0 = SOUND_MODE, 1=VIBRT_MODE)
+volatile bool mode;
+
+// lcd backlight timer (in miliseconds)
+volatile uint16_t backlight_time_counter;
+
+// indicates whether lcd backlight is on
+volatile bool backlight_on;
 
 // available time signatures
 uint8_t signatures[4] = {0x44, 0x34, 0x54, 0x74};

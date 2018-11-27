@@ -1,5 +1,14 @@
 # avr-metronome
 
+#### Features
+- [x] Sound mode with volume control
+- [x] Rotary encoder (with push button) user interface
+- [x] BPM and basic signatures control
+- [x] Tap tempo (button)
+- [x] PWM LCD backlight (dimming after a period of inactivity)
+- [ ] Storing metronome settings in EEPROM
+- [ ] Remote vibration module (BLE)
+- [ ] Custom character display
 
 #### Project structure
 ```c

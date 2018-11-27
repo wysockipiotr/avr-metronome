@@ -36,6 +36,16 @@
 #define TAP_PIN         PIND
 #define TAP_BTN         PD7
 
+#define SHUTDOWN_DIR    DDRB
+#define SHUTDOWN_PORT   PORTB
+#define SHUTDOWN_PIN    PINB
+#define SHUTDOWN        PB0
+
+#define BACKLIGHT_DIR   DDRB
+#define BACKLIGHT_PORT  PORTB
+#define BACKLIGHT_PIN   PINB
+#define BACKLIGHT       PB1
+
 // SPI
 #define SPI_POT_SS      PB2
 #define SPI_POT_SS_PORT PORTB
@@ -61,6 +71,9 @@
 #define MIN_TAP_INTERVAL            150u
 #define MAX_TAP_INTERVAL            2000u
 
+#define BACKLIGHT_DURATION      20000u  // 20s
+#define DEFAULT_BRIGHTNESS      120u
+
 #define MIN_BPM             30u
 #define MAX_BPM             400u
 #define MIN_VOLUME          0u
@@ -71,15 +84,19 @@
 #define DEFAULT_SIGNATURE   0u
 #define G                   33u
 #define CIS                 47u
+#define TAP_NOTE            120u
 
 #define BPM_CURSOR_POS      0u
 #define SIG_CURSOR_POS      1u 
 #define VOL_CURSOR_POS      2u
 #define MODE_CURSOR_POS     3u
-#define PARAM_EDIT_SYMBOL   '>'
-#define PARAM_SELECT_SYMBOL '}'
+#define PARAM_EDIT_SYMBOL   '*'
+#define PARAM_SELECT_SYMBOL '>'
 
 #define SOUND_LABEL     "SOUND"
 #define VIBRT_LABEL     "VIBRT"
+
+#define SOUND_MODE      0u 
+#define VIBRT_MODE      1u
 
 #endif //__setup_h__

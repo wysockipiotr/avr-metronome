@@ -21,7 +21,8 @@ extern volatile uint16_t t_sleep;
 
 extern volatile uint8_t volume;
 
-extern volatile char* mode;
+//extern volatile char* mode;
+extern volatile bool mode;
 
 extern volatile uint16_t tap_interval_counter;
 
@@ -34,5 +35,10 @@ extern uint8_t signatures[4];
 extern char firstLineBuffer[LCD_SIZE + 1];
 
 extern char secondLineBuffer[LCD_SIZE + 1];
+
+extern volatile uint16_t backlight_time_counter;
+
+extern volatile bool backlight_on;
+
 
 #endif //__global_h__
