@@ -155,17 +155,23 @@ void handle_timer2_overflow(void) {
 }
 
 inline static void update_display(void) {
+    
+    // interpolate first line: "> {bpm}BPM  > {signature}"
     snprintf(firstLineBuffer, 17, "%c %3uBPM %c %2u/%1u ",
              cursorVisible(cursor, 0, cursor_symbol),
              bpm,
              cursorVisible(cursor, 1, cursor_symbol),
              signatures[signature] >> 4,
              signatures[signature] & 0x0f);
+    
+    // interpolate second line: ">  {volume}% > {mode}"
     snprintf(secondLineBuffer, 17, "%c %3u%%  %c  %s",
              cursorVisible(cursor, 2, cursor_symbol),
              volume,
              cursorVisible(cursor, 3, cursor_symbol),
              (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
+    
+    // show interpolated strings
     lcd_string_xy(0, 0, firstLineBuffer);
     lcd_string_xy(1, 0, secondLineBuffer);
 }
