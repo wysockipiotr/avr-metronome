@@ -72,6 +72,9 @@ void handle_portd_pin_change(void) {
                 } else {
                     cursor = 3u;
                 }
+                if (mode == VIBRT_MODE && cursor == 2u) {
+                    cursor = 1u;
+                }
             } else {
                 update_active_param(-1);
             }
@@ -81,14 +84,19 @@ void handle_portd_pin_change(void) {
             if (!edit_active) {
                 ++cursor;
                 cursor %= 4u;
+                if (mode == VIBRT_MODE && cursor == 2u) {
+                    cursor = 3u;
+                }
             } else {
                 update_active_param(1);
-            }
+            }           
         }
 
         recalc_durations();
 
         update_display();
+
+        transmit_metronome(bpm, signature);
 
         // force a little down time before continuing
         _delay_ms(2);
@@ -102,6 +110,7 @@ void handle_portd_pin_change(void) {
 
         // beep during tap
         sound_locked = false;
+        if (mode == VIBRT_MODE) setBit(SHUTDOWN_PORT, SHUTDOWN);
         play_note(TAP_NOTE, t_beep);
         sound_locked = true;
 
@@ -133,9 +142,15 @@ void handle_timer2_overflow(void) {
        // TCNT2 = TAP_TIMER_INITIAL_OFFSET;
     } else {
         // dismiss tap tempo in case of timeout (over 2000ms)
-        tap_started = false;
+        if (tap_started) {
+            tap_started = false;
+            if (mode == VIBRT_MODE) {
+                transmit_metronome(bpm, signature);
+                clearBit(SHUTDOWN_PORT, SHUTDOWN);
+            }
+            sound_locked = false;
+        }
         //TCCR2B &= ~(TCCR2B & 0x7);
-        sound_locked = false;
     }
 
     // handle backlight and settings storage
@@ -156,8 +171,7 @@ void handle_timer2_overflow(void) {
 }
 
 inline static void update_display(void) {
-    
-    // interpolate first line: "> {bpm}BPM  > {signature}"
+
     snprintf(firstLineBuffer, 17, "%c %3uBPM %c %2u/%1u ",
              cursorVisible(cursor, 0, cursor_symbol),
              bpm,
@@ -165,15 +179,31 @@ inline static void update_display(void) {
              signatures[signature] >> 4,
              signatures[signature] & 0x0f);
     
-    // interpolate second line: ">  {volume}% > {mode}"
-    snprintf(secondLineBuffer, 17, "%c %3u %%  %c %s",
-             cursorVisible(cursor, 2, cursor_symbol),
-             volume,
-             cursorVisible(cursor, 3, cursor_symbol),
-             (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
+    if (mode == SOUND_MODE) {
+        snprintf(secondLineBuffer, 17, "%c %2u%%    %c %s",
+                 cursorVisible(cursor, 2, cursor_symbol),
+                 volume % 100,
+                 cursorVisible(cursor, 3, cursor_symbol),
+                 SOUND_LABEL);
+                 if (volume == 100) {
+                     secondLineBuffer[2] = 'M';
+                     secondLineBuffer[3] = 'A';
+                     secondLineBuffer[4] = 'X';
+                     secondLineBuffer[5] = ' ';
+                 }
+        secondLineBuffer[6] = LCD_SPEAKER_CHAR;
+        secondLineBuffer[7] = (volume > 0) ? LCD_WAVE_CHAR : ' ';
+    } else {
+        snprintf(secondLineBuffer, LCD_SIZE+1, "         %c %s", 
+        cursorVisible(cursor, 3, cursor_symbol), 
+        VIBRT_LABEL);
+    }
+    // snprintf(secondLineBuffer, 17, "%c %3u %%  %c %s",
+    //          cursorVisible(cursor, 2, cursor_symbol),
+    //          volume,
+    //          cursorVisible(cursor, 3, cursor_symbol),
+    //          (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
     
-    secondLineBuffer[6] = LCD_SPEAKER_CHAR;
-    secondLineBuffer[7] = LCD_WAVE_CHAR;
     firstLineBuffer[15] = LCD_NOTE_CHAR;
 
     // show interpolated strings
@@ -200,6 +230,7 @@ inline static void update_active_param(int delta) {
             mcp_pot_set_percent_value(volume);
             break;
         case MODE_CURSOR_POS:
+            //if (mode == VIBRT_MODE) { transmit_metronome_off(); }
             mode = (mode == SOUND_MODE) ? VIBRT_MODE : SOUND_MODE;
             break;
         default:
@@ -212,8 +243,6 @@ inline static void update_active_param(int delta) {
     } else {
         setBit(SHUTDOWN_PORT, SHUTDOWN);
     }
-
-    transmit_metronome(bpm, signature);
 }
 
 inline static void setup(void) {

@@ -62,7 +62,9 @@ void transmit_metronome(uint16_t bpm, uint8_t signature) {
 void transmit_metronome_off(void) {
 
     // transmit vibration disable signal
-    transmit_byte(0x0);
+    for (uint8_t i = 0u; i < 3u; ++i) {
+        transmit_byte(0x0);
+    }
 }
 
 uint8_t receive_byte(void) {
