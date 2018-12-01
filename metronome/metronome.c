@@ -56,6 +56,9 @@ void handle_portd_pin_change(void) {
     clearBit(SPEAKER_DIR, SPEAKER);
 
     if (bit_is_clear(ROTARY_PIN, ROTARY_BTN)) {
+        if (mode == VIBRT_MODE && edit_active) {
+            transmit_metronome(bpm, signature);
+        }
         edit_active = !edit_active;
         cursor_symbol = (edit_active) ? PARAM_EDIT_SYMBOL : PARAM_SELECT_SYMBOL;
         update_display();
@@ -95,8 +98,6 @@ void handle_portd_pin_change(void) {
         recalc_durations();
 
         update_display();
-
-        transmit_metronome(bpm, signature);
 
         // force a little down time before continuing
         _delay_ms(2);
