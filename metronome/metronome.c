@@ -89,6 +89,7 @@ void handle_portd_pin_change(void) {
         recalc_durations();
 
         update_display();
+
         // force a little down time before continuing
         _delay_ms(2);
         // wait until R1 comes back high
@@ -165,12 +166,16 @@ inline static void update_display(void) {
              signatures[signature] & 0x0f);
     
     // interpolate second line: ">  {volume}% > {mode}"
-    snprintf(secondLineBuffer, 17, "%c %3u%%  %c  %s",
+    snprintf(secondLineBuffer, 17, "%c %3u %%  %c %s",
              cursorVisible(cursor, 2, cursor_symbol),
              volume,
              cursorVisible(cursor, 3, cursor_symbol),
              (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
     
+    secondLineBuffer[6] = LCD_SPEAKER_CHAR;
+    secondLineBuffer[7] = LCD_WAVE_CHAR;
+    firstLineBuffer[15] = LCD_NOTE_CHAR;
+
     // show interpolated strings
     lcd_string_xy(0, 0, firstLineBuffer);
     lcd_string_xy(1, 0, secondLineBuffer);
