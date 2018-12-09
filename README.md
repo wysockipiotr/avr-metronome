@@ -59,3 +59,10 @@ Override parameters in Makefile to suit your hardware configuration. Here, Ardui
 ```
 ##### Deployment
 Use `make flash` to compile and save program in flash memory (using `avrdude`). Use `make size` to find out about the size of the program.
+
+#### Schematics
+##### Main module
+![main-module-schematic](https://github.com/96wysocki/avr-metronome/blob/assets/assets/main-img.png)
+
+##### Remote module
+![remote-module-schematic](https://github.com/96wysocki/avr-metronome/blob/assets/assets/remote-img.png)
