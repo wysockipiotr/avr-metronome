@@ -4,7 +4,7 @@ BAUD = 9600
 
 MAIN = main.c
 
-LOCAL_SOURCE = lcd.c mcp41xx.c metronome.c usart.c eeprom.c
+LOCAL_SOURCE = global.c lcd.c mcp41xx.c metronome.c usart.c eeprom.c
 
 EXTRA_SOURCE_DIR = 
 EXTRA_SOURCE_FILES = 
