@@ -8,7 +8,7 @@
 - [x] PWM LCD backlight (dimming after a period of inactivity)
 - [ ] Storing metronome settings in the internal EEPROM
 - [ ] Remote vibration module (BLE)
-- [ ] Custom character display
+- [x] Custom character display
 
 #### Project structure
 ```c
@@ -16,6 +16,9 @@
    +-- README.md
    +-- .gitignore
    +-- doc
+      +-- eagle
+         +-- main
+         +-- remote
    +-- metronome          // ATmega metronome main module directory
       +-- Makefile        // compiler and programmer config
       +-- main.c          // entry point
@@ -24,6 +27,8 @@
       +-- global.h        // extern declarations
       +-- lcd.h           // LCD 2x16 interfacing in 4-bit mode
       +-- lcd.c
+      +-- eeprom.h
+      +-- eeprom.c
       +-- metronome.h     // core logic of the metronome, ISR handlers
       +-- metronome.c
       +-- usart.h         // serial communication with HM-10 BLE module
@@ -54,7 +59,3 @@ Override parameters in Makefile to suit your hardware configuration. Here, Ardui
 ```
 ##### Deployment
 Use `make flash` to compile and save program in flash memory (using `avrdude`). Use `make size` to find out about the size of the program.
-
-#### Main module
-##### Schematic with connectors
-![metronome-schematic](https://github.com/96wysocki/avr-metronome/blob/master/doc/metronome-main.png)
