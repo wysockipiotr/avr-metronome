@@ -9,7 +9,7 @@
 - [x] Storing metronome settings in the internal EEPROM
 - [x] Custom character display
 - [x] Remote vibration module (BLE)
-- [ ] Default idle state for remote module, receiving disable signal
+- [x] Default idle state for remote module, receiving disable signal
 
 #### Project structure
 ```c
