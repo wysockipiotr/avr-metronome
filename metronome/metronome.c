@@ -3,6 +3,7 @@
 #include "usart.h"
 #include "mcp41xx.h"
 #include "metronome.h"
+#include "eeprom.h"
 
 #include <avr/interrupt.h>
 #include <avr/power.h>
@@ -101,6 +102,7 @@ void handle_portd_pin_change(void) {
 
         // force a little down time before continuing
         _delay_ms(2);
+
         // wait until R1 comes back high
         while (bit_is_clear(ROTARY_PIN, ROTARY_A)) {}
     }
@@ -163,7 +165,8 @@ void handle_timer2_overflow(void) {
             set_brightness(0);
             //backlight_time_counter = 0u;
 
-            // TODO: store current metronome settings in eeprom
+            // store current metronome settings in eeprom (bpm, signature, volume, mode)
+            eeprom_store_settings();
         }
     }
 
@@ -230,9 +233,15 @@ inline static void update_active_param(int delta) {
             }
             mcp_pot_set_percent_value(volume);
             break;
-        case MODE_CURSOR_POS:
-            //if (mode == VIBRT_MODE) { transmit_metronome_off(); }
-            mode = (mode == SOUND_MODE) ? VIBRT_MODE : SOUND_MODE;
+        case MODE_CURSOR_POS: 
+            if (mode == VIBRT_MODE) {
+                // send remote metronome module disable signal
+                transmit_metronome_off(); 
+                mode = SOUND_MODE;
+            } else {
+                mode = VIBRT_MODE;
+            }
+            // mode = (mode == SOUND_MODE) ? VIBRT_MODE : SOUND_MODE;
             break;
         default:
             break;
@@ -251,16 +260,13 @@ inline static void setup(void) {
     clock_prescale_set(CLK_NO_DIVIDE);
 
     // initial values
+    eeprom_load_settings();
     cursor = 0u;
-    bpm = DEFAULT_BPM;
-    volume = DEFAULT_VOL;
-    signature = DEFAULT_SIGNATURE;
     t_beep = 6000u / bpm;
     t_sleep = 54000u / bpm;
     tap_interval_counter = 0u;
     tap_started = false;
     sound_locked = false;
-    mode = SOUND_MODE;
     edit_active = false;
     cursor_symbol = PARAM_SELECT_SYMBOL;
 

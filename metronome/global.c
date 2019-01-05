@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include "util.h"
+#include "setup.h"
 #include "global.h"
 
 // currently controlled parameter (highlighted on screen)
@@ -47,7 +48,7 @@ volatile uint16_t backlight_time_counter;
 volatile bool backlight_on;
 
 // available time signatures
-uint8_t signatures[4] = {0x44, 0x34, 0x54, 0x74};
+uint8_t signatures[NUMBER_OF_SIGNATURES] = { 0x44, 0x34, 0x54, 0x74 };
 
 // content to be displayed on LCD
 char firstLineBuffer[LCD_SIZE + 1];

@@ -2,9 +2,9 @@
 
 #include "Qduino.h"
 
-#define MOTOR       9  // vibration motor PWM output
-#define RX          14    // RX receives from BLE TX
-#define TX          15    // TX transmits to BLE RX (through voltage divider)
+#define MOTOR       9   // vibration motor PWM output
+#define RX          14  // RX receives from BLE TX
+#define TX          15  // TX transmits to BLE RX
 
 uint16_t            bpm;
 volatile uint16_t   period;

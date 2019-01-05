@@ -24,8 +24,8 @@ CFLAGS += -Wall -Wstrict-prototypes
 CFLAGS += -g -ggdb
 CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,--relax
 CFLAGS += -std=gnu99
-## CFLAGS += -Wl,-u,vfprintf -lprintf_flt -lm  ## do wypisywanie liczb zmiennoprzecinkowych
-## CFLAGS += -Wl,-u,vfprintf -lprintf_min      ## mniejsza funkcja printf
+## CFLAGS += -Wl,-u,vfprintf -lprintf_flt -lm 
+## CFLAGS += -Wl,-u,vfprintf -lprintf_min     
 
 TARGET = $(strip $(basename $(MAIN)))
 SRC = $(TARGET).c

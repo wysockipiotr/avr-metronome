@@ -107,5 +107,15 @@
 
 #define SOUND_MODE                  0u 
 #define VIBRT_MODE                  1u
+#define DEFAULT_MODE                SOUND_MODE
+
+#define NUMBER_OF_MODES             2
+#define NUMBER_OF_SIGNATURES        4
+
+#define EEPROM_STORE_ADR            0
+#define EEPROM_STORE_BPM            ((uint16_t*)EEPROM_STORE_ADR)
+#define EEPROM_STORE_VOL            ((uint8_t*)EEPROM_STORE_ADR + 2)
+#define EEPROM_STORE_SIG            ((uint8_t*)EEPROM_STORE_ADR + 3)
+#define EEPROM_STORE_MODE           ((uint8_t*)EEPROM_STORE_ADR + 4)
 
 #endif //__setup_h__

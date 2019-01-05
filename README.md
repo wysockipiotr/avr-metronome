@@ -6,9 +6,10 @@
 - [x] BPM and basic signatures control
 - [x] Tap tempo (button)
 - [x] PWM LCD backlight (dimming after a period of inactivity)
-- [ ] Storing metronome settings in the internal EEPROM
-- [ ] Remote vibration module (BLE)
+- [x] Storing metronome settings in the internal EEPROM
 - [x] Custom character display
+- [x] Remote vibration module (BLE)
+- [ ] Default idle state for remote module, receiving disable signal
 
 #### Project structure
 ```c
@@ -59,10 +60,3 @@ Override parameters in Makefile to suit your hardware configuration. Here, Ardui
 ```
 ##### Deployment
 Use `make flash` to compile and save program in flash memory (using `avrdude`). Use `make size` to find out about the size of the program.
-
-#### Schematics
-##### Main module
-![main-module-schematic](https://github.com/96wysocki/avr-metronome/blob/assets/assets/main-img.png)
-
-##### Remote module
-![remote-module-schematic](https://github.com/96wysocki/avr-metronome/blob/assets/assets/remote-img.png)
