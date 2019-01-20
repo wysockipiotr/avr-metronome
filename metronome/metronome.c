@@ -64,6 +64,9 @@ void handle_portd_pin_change(void) {
     if (bit_is_clear(ROTARY_PIN, ROTARY_BTN)) {
         if (mode == VIBRT_MODE && edit_active) {
             transmit_metronome(bpm, signature);
+        } 
+        if (mode == SOUND_MODE && edit_active) {
+            transmit_metronome_off();
         }
         edit_active = !edit_active;
         cursor_symbol = (edit_active) ? PARAM_EDIT_SYMBOL : PARAM_SELECT_SYMBOL;
@@ -79,8 +82,12 @@ void handle_portd_pin_change(void) {
                 } else {
                     cursor = 4u;
                 }
-                if (mode == VIBRT_MODE && cursor == 2u) {
-                    cursor = 1u;
+                if (mode == VIBRT_MODE) {
+                    if (cursor == 2u) {
+                        cursor = 1u;
+                    } else if (cursor == 4u) {
+                        cursor = 3u;
+                    }
                 }
             } else {
                 update_active_param(-1);
@@ -90,8 +97,12 @@ void handle_portd_pin_change(void) {
             if (!edit_active) {
                 ++cursor;
                 cursor %= 5u;
-                if (mode == VIBRT_MODE && cursor == 2u) {
-                    cursor = 3u;
+                if (mode == VIBRT_MODE) {
+                    if (cursor == 2u) {
+                        cursor = 3u;
+                    } else if (cursor == 4u) {
+                        cursor = 0u;
+                    }
                 }
             } else {
                 update_active_param(1);
@@ -270,7 +281,7 @@ inline static void update_active_param(int delta) {
         case MODE_CURSOR_POS:
             if (mode == VIBRT_MODE) {
                 // send remote metronome module disable signal
-                transmit_metronome_off();
+                //transmit_metronome_off();
                 mode = SOUND_MODE;
             } else {
                 mode = VIBRT_MODE;
