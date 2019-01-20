@@ -55,7 +55,7 @@ void transmit_metronome(uint16_t bpm, uint8_t signature) {
     // transmit bpm lower half
     transmit_byte(bpm & 0xff);
 
-    // transmit signature (e.g. 0010 0011 for 3/4 signature)
+    // transmit signature ( signature / 4 )
     transmit_byte(signature);
 }
 

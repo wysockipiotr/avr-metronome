@@ -1,7 +1,7 @@
-#include <avr/io.h>
-#include "util.h"
-#include "setup.h"
 #include "global.h"
+#include <avr/io.h>
+#include "setup.h"
+#include "util.h"
 
 // currently controlled parameter (highlighted on screen)
 // [0] bpm [1, 2] signature [3] volume [4] mode
@@ -17,7 +17,7 @@ volatile bool edit_active;
 // beats per minute
 volatile uint16_t bpm;
 
-// index of time signature chosen from signatures array
+// time signature
 volatile uint8_t signature;
 
 // duration of metronome beep
@@ -47,9 +47,9 @@ volatile uint16_t backlight_time_counter;
 // indicates whether lcd backlight is on
 volatile bool backlight_on;
 
-// available time signatures
-uint8_t signatures[NUMBER_OF_SIGNATURES] = { 0x44, 0x34, 0x54, 0x74 };
-
 // content to be displayed on LCD
 char firstLineBuffer[LCD_SIZE + 1];
+
 char secondLineBuffer[LCD_SIZE + 1];
+
+volatile uint8_t pitch_index;

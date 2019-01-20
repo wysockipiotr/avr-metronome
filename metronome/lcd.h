@@ -28,4 +28,6 @@ void lcd_string(char * str);
 
 void lcd_string_xy(char row, char pos, char * str);
 
+void load_tone_name_from_pgm(uint8_t tone_index, char * tone_name);
+
 #endif //__lcd_h__

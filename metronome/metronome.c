@@ -1,11 +1,12 @@
-#include "util.h"
-#include "global.h"
-#include "usart.h"
-#include "mcp41xx.h"
 #include "metronome.h"
 #include "eeprom.h"
+#include "global.h"
+#include "mcp41xx.h"
+#include "usart.h"
+#include "util.h"
 
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <avr/power.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -43,13 +44,17 @@ inline static void init_dimmer_pwm(void);
 // set lcd backlight brightness (PWM)
 inline static void set_brightness(uint8_t brightness);
 
+inline static uint8_t get_tone(uint8_t tone_index);
+
+const static uint8_t tone_table[] PROGMEM = {D2, Dx2, E2, F2, Fx2, G2, Gx2, A2, Ax2,
+                                             B2, C3, Cx3, D3, Dx3, E3, F3, Fx3, G3};
+
 void metronome(void) {
     setup();
     loop();
 }
 
 void handle_portd_pin_change(void) {
-
     set_brightness(DEFAULT_BRIGHTNESS);
     backlight_on = true;
     backlight_time_counter = 0u;
@@ -66,15 +71,13 @@ void handle_portd_pin_change(void) {
     }
 
     if (bit_is_clear(ROTARY_PIN, ROTARY_A)) {
-
         if (bit_is_clear(ROTARY_PIN, ROTARY_B)) {
-
             // left rotate
             if (!edit_active) {
                 if (cursor) {
                     --cursor;
                 } else {
-                    cursor = 3u;
+                    cursor = 4u;
                 }
                 if (mode == VIBRT_MODE && cursor == 2u) {
                     cursor = 1u;
@@ -83,17 +86,16 @@ void handle_portd_pin_change(void) {
                 update_active_param(-1);
             }
         } else {
-
             // right rotate
             if (!edit_active) {
                 ++cursor;
-                cursor %= 4u;
+                cursor %= 5u;
                 if (mode == VIBRT_MODE && cursor == 2u) {
                     cursor = 3u;
                 }
             } else {
                 update_active_param(1);
-            }           
+            }
         }
 
         recalc_durations();
@@ -104,7 +106,8 @@ void handle_portd_pin_change(void) {
         _delay_ms(2);
 
         // wait until R1 comes back high
-        while (bit_is_clear(ROTARY_PIN, ROTARY_A)) {}
+        while (bit_is_clear(ROTARY_PIN, ROTARY_A)) {
+        }
     }
 
     if (bit_is_clear(TAP_PIN, TAP_BTN)) {
@@ -119,7 +122,7 @@ void handle_portd_pin_change(void) {
             if (mode == VIBRT_MODE) setBit(SHUTDOWN_PORT, SHUTDOWN);
             play_note(TAP_NOTE, TAP_BEEP_DURATION);
             sound_locked = true;
-        }        
+        }
 
         // tap tempo handler
         if (tap_started) {
@@ -142,11 +145,10 @@ void handle_portd_pin_change(void) {
 }
 
 void handle_timer2_overflow(void) {
-
     // handle tap tempo
     if (tap_interval_counter <= MAX_TAP_INTERVAL) {
         ++tap_interval_counter;
-       // TCNT2 = TAP_TIMER_INITIAL_OFFSET;
+        // TCNT2 = TAP_TIMER_INITIAL_OFFSET;
     } else {
         // dismiss tap tempo in case of timeout (over 2000ms)
         if (tap_started) {
@@ -179,35 +181,60 @@ void handle_timer2_overflow(void) {
 }
 
 inline static void update_display(void) {
+    if (cursor <= MODE_CURSOR_POS) {
+        // Menu page (1): bpm, signature, volume (in sound mode), mode
 
-    snprintf(firstLineBuffer, 17, "%c %3uBPM %c %2u/%1u ",
-             cursorVisible(cursor, 0, cursor_symbol),
-             bpm,
-             cursorVisible(cursor, 1, cursor_symbol),
-             signatures[signature] >> 4,
-             signatures[signature] & 0x0f);
-    
-    if (mode == SOUND_MODE) {
-        snprintf(secondLineBuffer, 17, "%c %2u%%    %c %s",
-                 cursorVisible(cursor, 2, cursor_symbol),
-                 volume % 100,
-                 cursorVisible(cursor, 3, cursor_symbol),
-                 SOUND_LABEL);
-                 if (volume == 100) {
-                     secondLineBuffer[2] = 'M';
-                     secondLineBuffer[3] = 'A';
-                     secondLineBuffer[4] = 'X';
-                     secondLineBuffer[5] = ' ';
-                 }
-        secondLineBuffer[6] = LCD_SPEAKER_CHAR;
-        secondLineBuffer[7] = (volume > 0) ? LCD_WAVE_CHAR : ' ';
+        snprintf(firstLineBuffer, 17, "%c %3uBPM %c %2u/4 ",
+                 cursorVisible(cursor, 0, cursor_symbol),
+                 bpm,
+                 cursorVisible(cursor, 1, cursor_symbol),
+                 signature);
+
+        if (mode == SOUND_MODE) {
+            // second line of menu in sound mode
+
+            snprintf(secondLineBuffer, 17, "%c %2u%%    %c %s",
+                     cursorVisible(cursor, 2, cursor_symbol),
+                     volume % 100,
+                     cursorVisible(cursor, 3, cursor_symbol),
+                     SOUND_LABEL);
+
+            if (volume == 100) {
+                secondLineBuffer[2] = 'M';
+                secondLineBuffer[3] = 'A';
+                secondLineBuffer[4] = 'X';
+                secondLineBuffer[5] = ' ';
+            }
+
+            secondLineBuffer[6] = LCD_SPEAKER_CHAR;
+            secondLineBuffer[7] = (volume > 0) ? LCD_WAVE_CHAR : ' ';
+        } else {
+            // second line of menu in vibration mode
+
+            snprintf(secondLineBuffer, LCD_SIZE + 1, "         %c %s",
+                     cursorVisible(cursor, 3, cursor_symbol),
+                     VIBRT_LABEL);
+        }
+
+        firstLineBuffer[15] = LCD_NOTE_CHAR;
+
     } else {
-        snprintf(secondLineBuffer, LCD_SIZE+1, "         %c %s", 
-        cursorVisible(cursor, 3, cursor_symbol), 
-        VIBRT_LABEL);
+        // Menu page (2): pitch
+
+        char accent_tone_name[4];
+        load_tone_name_from_pgm(pitch_index + ACCENT_PITCH_OFFSET, accent_tone_name);
+        char main_tone_name[4];
+        load_tone_name_from_pgm(pitch_index, main_tone_name);
+
+        snprintf(firstLineBuffer, 17, "%c PITCH %s/ %s",
+                 cursor_symbol,
+                 accent_tone_name,
+                 main_tone_name);
+
+        for (int i = 0; i < LCD_SIZE; ++i) {
+            secondLineBuffer[i] = ' ';
+        }
     }
-    
-    firstLineBuffer[15] = LCD_NOTE_CHAR;
 
     // show interpolated strings
     lcd_string_xy(0, 0, firstLineBuffer);
@@ -218,29 +245,48 @@ inline static void update_active_param(int delta) {
     switch (cursor) {
         case BPM_CURSOR_POS:
             if (within(bpm + delta, MIN_BPM, MAX_BPM)) {
-                bpm += delta; 
+                bpm += delta;
             }
             break;
+
         case SIG_CURSOR_POS:
-            signature += delta;
-            signature %= 4;
+            if (signature <= MIN_SIGNATURE && delta == -1) {
+                signature = MAX_SIGNATURE;
+            } else if (signature >= MAX_SIGNATURE && delta == 1) {
+                signature = MIN_SIGNATURE;
+            } else {
+                signature += delta;
+            }
             break;
+
         case VOL_CURSOR_POS:
             delta *= 5;
             if (within(volume + delta, MIN_VOLUME, MAX_VOLUME)) {
-                volume += delta; 
+                volume += delta;
             }
             mcp_pot_set_percent_value(volume);
             break;
-        case MODE_CURSOR_POS: 
+
+        case MODE_CURSOR_POS:
             if (mode == VIBRT_MODE) {
                 // send remote metronome module disable signal
-                transmit_metronome_off(); 
+                transmit_metronome_off();
                 mode = SOUND_MODE;
             } else {
                 mode = VIBRT_MODE;
             }
             break;
+
+        case PITCH_CURSOR_POS:
+            if (pitch_index == MIN_PITCH_INDEX && delta == -1) {
+                pitch_index = MAX_PITCH_INDEX;
+            } else if (pitch_index >= MAX_PITCH_INDEX && delta == 1) {
+                pitch_index = MIN_PITCH_INDEX;
+            } else {
+                pitch_index += delta;
+            }
+            break;
+
         default:
             break;
     }
@@ -272,7 +318,7 @@ inline static void setup(void) {
     spi_init();
     usart_init();
 
-    init_dimmer_pwm(); 
+    init_dimmer_pwm();
 
     init_tap_timer();
     init_sound_timer();
@@ -300,16 +346,19 @@ inline static void loop(void) {
 
     while (true) {
         if (mode == SOUND_MODE) {
-            play_note(G, t_beep);
-            for (t = t_sleep; t > 0; --t)
-                _delay_ms(1);
-            for (i = 0u; i < (signatures[signature] >> 4) - 1; ++i) {
-                play_note(CIS, t_beep);
-                for (t = t_sleep; t > 0; --t)
-                    _delay_ms(1);
-            }
-        } else {
+            play_note(get_tone(pitch_index + ACCENT_PITCH_OFFSET), t_beep);
 
+            for (t = t_sleep; t > 0; --t) {
+                _delay_ms(1);
+            }
+
+            for (i = 0u; i < signature - 1; ++i) {
+                play_note(get_tone(pitch_index), t_beep);
+
+                for (t = t_sleep; t > 0; --t) {
+                    _delay_ms(1);
+                }
+            }
         }
     }
 }
@@ -385,4 +434,8 @@ inline static void init_dimmer_pwm(void) {
 inline static void set_brightness(uint8_t brightness) {
     //OCR1B = OCR1A;
     OCR1A = brightness;
+}
+
+inline static uint8_t get_tone(uint8_t tone_index) {
+    return pgm_read_byte(tone_table + tone_index);
 }

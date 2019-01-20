@@ -9,6 +9,7 @@ void eeprom_store_settings(void) {
     eeprom_update_byte(EEPROM_STORE_SIG, signature);
     eeprom_update_byte(EEPROM_STORE_VOL, volume);
     eeprom_update_byte(EEPROM_STORE_MODE, mode);
+    eeprom_update_byte(EEPROM_STORE_PITCH, pitch_index);
 }
 
 void eeprom_load_settings(void) {
@@ -17,13 +18,14 @@ void eeprom_load_settings(void) {
     signature = eeprom_read_byte(EEPROM_STORE_SIG);
     volume = eeprom_read_byte(EEPROM_STORE_VOL);
     mode = eeprom_read_byte(EEPROM_STORE_MODE);
+    pitch_index = eeprom_read_byte(EEPROM_STORE_PITCH);
 
     // normalize values
     if (!within(bpm, MIN_BPM, MAX_BPM)) {
         bpm = DEFAULT_BPM;
     }
     
-    if (signature >= NUMBER_OF_SIGNATURES) {
+    if (!within(signature, MIN_SIGNATURE, MAX_SIGNATURE)) {
         signature = DEFAULT_SIGNATURE;
     }
 
@@ -34,4 +36,9 @@ void eeprom_load_settings(void) {
     if (mode >= NUMBER_OF_MODES) {
         mode = DEFAULT_MODE;
     }
+
+    if (!within(pitch_index, MIN_PITCH_INDEX, MAX_PITCH_INDEX)) {
+        pitch_index = DEFAULT_PITCH_INDEX;
+    }
+
 }

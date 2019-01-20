@@ -1,8 +1,8 @@
 #ifndef __global_h__
 #define __global_h__
 
-#include "util.h"
 #include "lcd.h"
+#include "util.h"
 
 #include <avr/io.h>
 #include "global.h"
@@ -22,7 +22,7 @@ extern volatile bool edit_active;
 // beats per minute
 extern volatile uint16_t bpm;
 
-// index of time signature chosen from signatures array
+// time signature
 extern volatile uint8_t signature;
 
 // duration of metronome beep
@@ -36,6 +36,8 @@ extern volatile uint8_t volume;
 
 // counter measuring interval between last two taps in miliseconds
 extern volatile uint16_t tap_interval_counter;
+
+extern volatile uint8_t pitch_index;
 
 // flag indicating whether tap tempo mode is currently active
 extern volatile bool tap_started;
@@ -52,11 +54,9 @@ extern volatile uint16_t backlight_time_counter;
 // indicates whether lcd backlight is on
 extern volatile bool backlight_on;
 
-// available time signatures
-extern uint8_t signatures[4];
-
 // content to be displayed on LCD
 extern char firstLineBuffer[LCD_SIZE + 1];
+
 extern char secondLineBuffer[LCD_SIZE + 1];
 
 #endif

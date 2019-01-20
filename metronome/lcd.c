@@ -16,6 +16,70 @@ const static uint8_t wave_char[] PROGMEM = {0x00, 0x01, 0x05, 0x15, 0x15, 0x05, 
 
 const static uint8_t note_char[] PROGMEM = {0x01, 0x01, 0x01, 0x01, 0x01, 0x0F, 0x1F, 0x0E};
 
+const static char d2_tone_name[] PROGMEM = "D2 ";
+
+const static char dx2_tone_name[] PROGMEM = "D#2";
+
+const static char e2_tone_name[] PROGMEM = "E2 ";
+
+const static char f2_tone_name[] PROGMEM = "F2 ";
+
+const static char fx2_tone_name[] PROGMEM = "F#2";
+
+const static char g2_tone_name[] PROGMEM = "G2 ";
+
+const static char gx2_tone_name[] PROGMEM = "G#2";
+
+const static char a2_tone_name[] PROGMEM = "A2 ";
+
+const static char ax2_tone_name[] PROGMEM = "A#2";
+
+const static char b2_tone_name[] PROGMEM = "B2 ";
+
+const static char c3_tone_name[] PROGMEM = "C3 ";
+
+const static char cx3_tone_name[] PROGMEM = "C#3";
+
+const static char d3_tone_name[] PROGMEM = "D3 ";
+
+const static char dx3_tone_name[] PROGMEM = "D#3";
+
+const static char e3_tone_name[] PROGMEM = "E3 ";
+
+const static char f3_tone_name[] PROGMEM = "F3 ";
+
+const static char fx3_tone_name[] PROGMEM = "F#3";
+
+const static char g3_tone_name[] PROGMEM = "G3 ";
+
+const static char* tone_names[18] PROGMEM = {
+    d2_tone_name,
+    dx2_tone_name,
+    e2_tone_name,
+    f2_tone_name,
+    fx2_tone_name,
+    g2_tone_name,
+    gx2_tone_name,
+    a2_tone_name,
+    ax2_tone_name,
+    b2_tone_name,
+    c3_tone_name,
+    cx3_tone_name,
+    d3_tone_name,
+    dx3_tone_name,
+    e3_tone_name,
+    f3_tone_name,
+    fx3_tone_name,
+    g3_tone_name,
+};
+
+void load_tone_name_from_pgm(uint8_t tone_index, char * tone_name) {
+    char * pgm_tone_name = (char *) pgm_read_word(tone_names + tone_index);
+    for (uint8_t i = 0; i < 4; ++i) {
+        tone_name[i] = pgm_read_byte( pgm_tone_name + i);
+    }
+}
+
 void lcd_init(void) {
     uint8_t i = 0u;
 

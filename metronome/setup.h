@@ -90,7 +90,9 @@
 #define VOLUME_STEP                 5u
 #define DEFAULT_BPM                 140u
 #define DEFAULT_VOL                 5u
-#define DEFAULT_SIGNATURE           0u
+#define DEFAULT_SIGNATURE           4u
+#define MIN_SIGNATURE               1u 
+#define MAX_SIGNATURE               16u
 #define G                           33u
 #define CIS                         47u
 #define TAP_NOTE                    120u
@@ -100,6 +102,8 @@
 #define SIG_CURSOR_POS              1u 
 #define VOL_CURSOR_POS              2u
 #define MODE_CURSOR_POS             3u
+#define PITCH_CURSOR_POS            4u
+
 #define PARAM_EDIT_SYMBOL           LCD_ARROWS_CHAR
 #define PARAM_SELECT_SYMBOL         LCD_FAT_ARROW_CHAR
 
@@ -111,12 +115,38 @@
 #define DEFAULT_MODE                SOUND_MODE
 
 #define NUMBER_OF_MODES             2
-#define NUMBER_OF_SIGNATURES        4
+// #define NUMBER_OF_SIGNATURES        4
 
 #define EEPROM_STORE_ADR            0
 #define EEPROM_STORE_BPM            ((uint16_t*)EEPROM_STORE_ADR)
 #define EEPROM_STORE_VOL            ((uint8_t*)EEPROM_STORE_ADR + 2)
 #define EEPROM_STORE_SIG            ((uint8_t*)EEPROM_STORE_ADR + 3)
 #define EEPROM_STORE_MODE           ((uint8_t*)EEPROM_STORE_ADR + 4)
+#define EEPROM_STORE_PITCH          ((uint8_t*)EEPROM_STORE_ADR + 5)
+
+// sound scale
+#define D2                          89
+#define Dx2                         84
+#define E2                          79
+#define F2                          75
+#define Fx2                         71
+#define G2                          67
+#define Gx2                         63
+#define A2                          59
+#define Ax2                         56
+#define B2                          53
+#define C3                          50
+#define Cx3                         47
+#define D3                          44
+#define Dx3                         42
+#define E3                          40
+#define F3                          37
+#define Fx3                         35
+#define G3                          33
+
+#define DEFAULT_PITCH_INDEX         11u
+#define MAX_PITCH_INDEX             11u
+#define MIN_PITCH_INDEX             0u
+#define ACCENT_PITCH_OFFSET         6u
 
 #endif //__setup_h__
