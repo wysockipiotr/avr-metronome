@@ -111,15 +111,19 @@ void handle_portd_pin_change(void) {
         edit_active = false;
         cursor_symbol = (edit_active) ? PARAM_EDIT_SYMBOL : PARAM_SELECT_SYMBOL;
 
+        bool tap_interval_is_within_range = within(tap_interval_counter, MIN_TAP_INTERVAL, MAX_TAP_INTERVAL);
+
         // beep during tap
-        sound_locked = false;
-        if (mode == VIBRT_MODE) setBit(SHUTDOWN_PORT, SHUTDOWN);
-        play_note(TAP_NOTE, t_beep);
-        sound_locked = true;
+        if (tap_interval_is_within_range || !tap_started) {
+            sound_locked = false;
+            if (mode == VIBRT_MODE) setBit(SHUTDOWN_PORT, SHUTDOWN);
+            play_note(TAP_NOTE, TAP_BEEP_DURATION);
+            sound_locked = true;
+        }        
 
         // tap tempo handler
         if (tap_started) {
-            if (within(tap_interval_counter, MIN_TAP_INTERVAL, MAX_TAP_INTERVAL)) {
+            if (tap_interval_is_within_range) {
                 t_beep = tap_interval_counter >> 4;
                 t_sleep = tap_interval_counter - t_beep;
                 bpm = 60000u / tap_interval_counter;
@@ -202,11 +206,6 @@ inline static void update_display(void) {
         cursorVisible(cursor, 3, cursor_symbol), 
         VIBRT_LABEL);
     }
-    // snprintf(secondLineBuffer, 17, "%c %3u %%  %c %s",
-    //          cursorVisible(cursor, 2, cursor_symbol),
-    //          volume,
-    //          cursorVisible(cursor, 3, cursor_symbol),
-    //          (mode == SOUND_MODE) ? SOUND_LABEL : VIBRT_LABEL);
     
     firstLineBuffer[15] = LCD_NOTE_CHAR;
 
@@ -241,7 +240,6 @@ inline static void update_active_param(int delta) {
             } else {
                 mode = VIBRT_MODE;
             }
-            // mode = (mode == SOUND_MODE) ? VIBRT_MODE : SOUND_MODE;
             break;
         default:
             break;

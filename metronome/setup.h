@@ -94,6 +94,7 @@
 #define G                           33u
 #define CIS                         47u
 #define TAP_NOTE                    120u
+#define TAP_BEEP_DURATION           100u
 
 #define BPM_CURSOR_POS              0u
 #define SIG_CURSOR_POS              1u 

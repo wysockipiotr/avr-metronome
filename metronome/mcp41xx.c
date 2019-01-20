@@ -1,4 +1,5 @@
 #include "mcp41xx.h"
+
 #include <avr/io.h>
 
 inline static void slave_select(void);
