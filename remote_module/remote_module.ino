@@ -11,12 +11,12 @@
 #define ACCENT true
 #define ACCENT_PWM 250u
 #define ACCENT_DUTY 85u
-#define ACCENT_COLOR GREEN
+#define ACCENT_COLOR RED
 #define NO_ACCENT false
 #define NO_ACCENT_PWM 200u
 #define NO_ACCENT_DUTY 45u
-#define NO_ACCENT_COLOR WHITE
-#define IDLE_COLOR RED
+#define NO_ACCENT_COLOR BLUE
+#define IDLE_COLOR GREEN
 
 // tempo in beats per minute
 uint16_t bpm;
@@ -40,7 +40,7 @@ int k = 0;
 uint16_t ble_buffer[3];
 
 // time signatures
-const uint8_t signatures[4] = {0x44, 0x34, 0x54, 0x74};
+//const uint8_t signatures[4] = {0x44, 0x34, 0x54, 0x74};
 
 // Qduino Mini library
 qduino q;
@@ -74,7 +74,9 @@ void loop() {
     if (enabled) {
         pulse(period, ACCENT);
 
-        for (i = 0u; i < (signature >> 4) - 1; ++i) {
+        for (i = 0u; i < signature - 1; ++i) {
+            read_from_ble();
+
             pulse(period, NO_ACCENT);
         }
     }
@@ -88,7 +90,7 @@ void read_from_ble() {
             if (ble_buffer[0] | ble_buffer[1] | ble_buffer[2]) {
                 bpm = (ble_buffer[0] << 8) | (ble_buffer[1] & 0xff);
                 period = 60000 / bpm;
-                signature = signatures[ble_buffer[2] % 4];
+                signature = ble_buffer[2];
                 enabled = true;
             } else {
                 enabled = false;
@@ -98,9 +100,9 @@ void read_from_ble() {
 #ifndef NO_DEBUG
             Serial.print(bpm);
             Serial.print(' ');
-            Serial.print(signature >> 4);
+            Serial.print(signature);
             Serial.print('/');
-            Serial.print(signature & 0x0f);
+            Serial.print('4');
             Serial.print('\n');
 #endif
         }
@@ -110,7 +112,7 @@ void read_from_ble() {
 
 void pulse(uint16_t duration, bool accent) {
     uint8_t duty = accent ? ACCENT_DUTY : NO_ACCENT_DUTY;
-    uint16_t t_high = duration * duty / 100u;
+    uint16_t t_high = (uint16_t)(((uint32_t)duration * duty) / 100u);
 
     analogWrite(MOTOR, accent ? ACCENT_PWM : NO_ACCENT_PWM);
     q.setRGB(accent ? ACCENT_COLOR : NO_ACCENT_COLOR);
