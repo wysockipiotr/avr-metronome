@@ -1,4 +1,19 @@
-# avr-metronome
+<h1 align="center">AVR Metronome</h1>
+<h5 align="center">Metronome with speaker and remote vibration module</h5>
+
+![Main module image](https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/main.jpg)
+
+<table>
+<tr>
+  <td style="text-align: center">
+    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/main.jpg"  />
+  </td>
+  <td style="text-align: center">
+    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/remote.jpg" />
+  </td>
+
+</tr>
+</table>
 
 #### Features
 - [x] Sound mode with volume control
