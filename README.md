@@ -1,19 +1,24 @@
 <h1 align="center">AVR Metronome</h1>
 <h5 align="center">Metronome with speaker and remote vibration module</h5>
 
-![Main module image](https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/main.jpg)
-
+#### Modules
 <table>
 <tr>
   <td style="text-align: center">
-    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/main.jpg"  />
+    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/main.jpg" height="320px" />
   </td>
   <td style="text-align: center">
-    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/remote.jpg" />
+    <img src="https://github.com/wysockipiotr/avr-metronome/blob/master/doc/img/remote.jpg" height="320px" />
   </td>
-
 </tr>
 </table>
+
+#### Built with
+- ATmega 168A-PU
+- Qduino Mini
+- MCP4161
+- TPA2005D1
+- HM-10 BLE
 
 #### Features
 - [x] Sound mode with volume control
@@ -25,6 +30,8 @@
 - [x] Custom character display
 - [x] Remote vibration module (BLE)
 - [x] Default idle state for remote module, receiving disable signal
+- [x] MicroUSB charging
+- [x] Adjustable sound pitch
 
 #### Project structure
 ```c
@@ -55,7 +62,6 @@
       +-- README.md
       +-- remote_module.ino
 ```
-
 
 #### Setup
 ##### Prerequisites
